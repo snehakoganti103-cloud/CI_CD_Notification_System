@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="eyebrow">CONTINUOUS INTEGRATION · INSTANT VISIBILITY</p>
+    <h1>Know when your<br><span>builds break.</span></h1>
+    <p class="hero-copy">Connect your GitHub repositories and view successful, failed, and cancelled workflow runs from one simple dashboard.</p>
+    <div class="actions">
+      <a class="button primary" href="{{ url_for('register') }}">Create free account</a>
+      <a class="button secondary" href="{{ url_for('login') }}">Sign in</a>
+    </div>
+  </div>
+  <div class="hero-card">
+    <div class="mock-head"><span class="dot red"></span><span class="dot yellow"></span><span class="dot green"></span><b>Latest workflow</b></div>
+    <div class="mock-status"><span class="status-badge failure">FAILED</span><span>Build and test</span></div>
+    <p class="muted">main · commit a83f21c</p>
+    <div class="alert-box"><strong>Build failed</strong><br><small>A workflow failure was received from GitHub Actions.</small></div>
+    <div class="mock-status"><span class="status-badge success">PASSED</span><span>Previous run</span></div>
+  </div>
+</section>
+<section class="feature-grid">
+  <article class="panel"><h3>One dashboard</h3><p>See recent build activity across your connected repositories.</p></article>
+  <article class="panel"><h3>Failure details</h3><p>Open a build record to review its branch, commit, workflow, and GitHub run link.</p></article>
+  <article class="panel"><h3>GitHub Actions</h3><p>Send build status automatically to your website using a workflow file.</p></article>
+</section>
+{% endblock %}

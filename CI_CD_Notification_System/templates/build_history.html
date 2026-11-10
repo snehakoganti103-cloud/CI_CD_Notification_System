@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Build history{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">WORKFLOW RECORDS</p><h1>Build history</h1><p class="muted">All build events received from your connected repositories.</p></div></div>
+<section class="panel section-panel">
+{% if builds %}
+<div class="table-wrap"><table><thead><tr><th>Repository</th><th>Workflow</th><th>Branch</th><th>Commit</th><th>Status</th><th>Received</th></tr></thead><tbody>
+{% for b in builds %}<tr><td>{{ b.full_name }}</td><td><a href="{{ url_for('failure_details', build_id=b.id) }}">{{ b.workflow_name or 'CI workflow' }}</a></td><td>{{ b.branch or '—' }}</td><td><code>{{ (b.commit_sha or '—')[:8] }}</code></td><td><span class="status-badge {{ b.status }}">{{ b.status|upper }}</span></td><td>{{ b.created_at[:19].replace('T',' ') }}</td></tr>{% endfor %}
+</tbody></table></div>
+{% else %}<div class="empty-state"><h3>No builds received</h3><p>When GitHub Actions runs, build events will appear here.</p></div>{% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<div class="form-card">
+  <p class="eyebrow">START MONITORING</p><h1>Create account</h1>
+  <form method="POST">
+    <label>Full name</label><input type="text" name="name" required maxlength="80" autocomplete="name">
+    <label>Email address</label><input type="email" name="email" required autocomplete="email">
+    <label>Password (minimum 8 characters)</label><input type="password" name="password" minlength="8" required autocomplete="new-password">
+    <button class="button primary full" type="submit">Register</button>
+  </form>
+  <p class="form-note">Already registered? <a href="{{ url_for('login') }}">Login</a></p>
+</div>
+{% endblock %}

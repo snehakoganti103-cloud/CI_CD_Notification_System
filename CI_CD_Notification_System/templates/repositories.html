@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}Repositories{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">YOUR PROJECTS</p><h1>Repositories</h1><p class="muted">Register the exact GitHub owner/repository name.</p></div></div>
+<div class="panel form-panel">
+  <h2>Connect a repository</h2>
+  <form method="POST" class="inline-form">
+    <div><label>GitHub repository</label><input name="full_name" placeholder="octocat/hello-world" required pattern="[^/]+/[^/]+" title="Use owner/repository format"></div>
+    <div><label>Repository URL (optional)</label><input type="url" name="github_url" placeholder="https://github.com/owner/repo"></div>
+    <button class="button primary" type="submit">Add repository</button>
+  </form>
+</div>
+<section class="panel section-panel">
+  <h2>Connected repositories</h2>
+  {% if repositories %}
+  {% for repo in repositories %}
+  <div class="repo-row"><div><strong>{{ repo.full_name }}</strong><p class="muted">{{ repo.github_url }}</p></div><div class="repo-actions"><a href="{{ repo.github_url }}" target="_blank" rel="noopener">Open GitHub ↗</a><form method="POST" action="{{ url_for('delete_repository', repo_id=repo.id) }}" data-confirm="Remove this repository and its build history?"><button class="text-danger">Remove</button></form></div></div>
+  {% endfor %}
+  {% else %}<p class="muted">No repositories connected yet.</p>{% endif %}
+</section>
+<section class="panel section-panel">
+  <h2>GitHub Actions setup</h2>
+  <ol class="steps">
+    <li>In your GitHub repository, open <b>Settings → Secrets and variables → Actions</b>.</li>
+    <li>Add repository secret <code>CI_NOTIFICATION_URL</code> with your deployed website address followed by <code>/api/builds</code>.</li>
+    <li>Add repository secret <code>CI_NOTIFICATION_TOKEN</code>. It must match the token configured as an environment variable on this Flask server.</li>
+    <li>Copy the <code>.github/workflows/ci.yml</code> file from this project into the same path in your GitHub repository.</li>
+  </ol>
+  <p class="muted small">For local testing, GitHub-hosted runners cannot reach localhost. Deploy the Flask app or use a secure temporary tunnel.</p>
+</section>
+{% endblock %}

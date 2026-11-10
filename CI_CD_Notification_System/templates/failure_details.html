@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Build details{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">BUILD #{{ build.id }}</p><h1>Build details</h1><p class="muted">{{ build.full_name }}</p></div><a class="button secondary" href="{{ url_for('build_history') }}">← Back to history</a></div>
+<section class="panel details-panel">
+  <div class="detail-status"><span class="status-badge {{ build.status }}">{{ build.status|upper }}</span><h2>{{ build.workflow_name or 'CI workflow' }}</h2></div>
+  <dl class="details-grid">
+    <div><dt>Repository</dt><dd>{{ build.full_name }}</dd></div>
+    <div><dt>Branch</dt><dd>{{ build.branch or '—' }}</dd></div>
+    <div><dt>Commit SHA</dt><dd><code>{{ build.commit_sha or '—' }}</code></dd></div>
+    <div><dt>Duration</dt><dd>{{ build.duration_seconds }} seconds</dd></div>
+    <div><dt>Received at</dt><dd>{{ build.created_at }}</dd></div>
+    <div><dt>Commit message</dt><dd>{{ build.commit_message or '—' }}</dd></div>
+  </dl>
+  {% if build.run_url %}<a class="button primary" href="{{ build.run_url }}" target="_blank" rel="noopener">Open workflow run on GitHub ↗</a>{% endif %}
+  {% if build.status == 'failure' %}<div class="alert-box failure-alert"><strong>Build failure detected</strong><p>The workflow reported a failed result. Open the GitHub Actions run to inspect the job logs and identify the failing step.</p></div>{% endif %}
+</section>
+{% endblock %}

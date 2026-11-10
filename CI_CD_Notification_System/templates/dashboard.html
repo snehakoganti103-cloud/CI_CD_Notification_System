@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="page-heading"><div><p class="eyebrow">OVERVIEW</p><h1>Dashboard</h1><p class="muted">Monitor the health of your connected repositories.</p></div><a class="button primary" href="{{ url_for('repositories') }}">+ Add repository</a></div>
+<div class="stats-grid">
+  <div class="stat-card"><span>Total builds</span><strong>{{ stats.total or 0 }}</strong></div>
+  <div class="stat-card"><span>Successful</span><strong class="success-text">{{ stats.passed or 0 }}</strong></div>
+  <div class="stat-card"><span>Failed</span><strong class="failure-text">{{ stats.failed or 0 }}</strong></div>
+  <div class="stat-card"><span>Repositories</span><strong>{{ repositories|length }}</strong></div>
+</div>
+<section class="panel section-panel">
+  <div class="section-title"><h2>Recent build activity</h2><a href="{{ url_for('build_history') }}">View all →</a></div>
+  {% if recent_builds %}
+  <div class="table-wrap"><table><thead><tr><th>Repository</th><th>Workflow</th><th>Branch</th><th>Status</th><th>Time</th></tr></thead><tbody>
+  {% for b in recent_builds %}
+  <tr><td><strong>{{ b.full_name }}</strong></td><td><a href="{{ url_for('failure_details', build_id=b.id) }}">{{ b.workflow_name or 'CI workflow' }}</a></td><td>{{ b.branch or '—' }}</td><td><span class="status-badge {{ b.status }}">{{ b.status|upper }}</span></td><td>{{ b.created_at[:19].replace('T',' ') }}</td></tr>
+  {% endfor %}
+  </tbody></table></div>
+  {% else %}<div class="empty-state"><h3>No build activity yet</h3><p>Add a repository and configure the GitHub Actions workflow to send build updates here.</p><a class="button primary" href="{{ url_for('repositories') }}">Connect a repository</a></div>{% endif %}
+</section>
+{% endblock %}

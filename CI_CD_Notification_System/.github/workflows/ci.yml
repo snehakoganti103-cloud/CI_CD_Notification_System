@@ -1,0 +1,88 @@
+name: CI Build and Notify
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+      - name: Run tests
+        id: tests
+        run: |
+          if [ -d tests ]; then
+            python -m pytest -q
+          else
+            echo "No tests directory found; dependency installation completed."
+          fi
+
+      - name: Notify BuildWatch
+        if: always()
+        env:
+          CI_NOTIFICATION_URL: ${{ secrets.CI_NOTIFICATION_URL }}
+          CI_NOTIFICATION_TOKEN: ${{ secrets.CI_NOTIFICATION_TOKEN }}
+          JOB_STATUS: ${{ job.status }}
+          REPOSITORY: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          COMMIT_SHA: ${{ github.sha }}
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+          WORKFLOW_NAME: ${{ github.workflow }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -z "$CI_NOTIFICATION_URL" ] || [ -z "$CI_NOTIFICATION_TOKEN" ]; then
+            echo "Notification secrets are not configured; skipping notification."
+            exit 0
+          fi
+
+          STATUS="$JOB_STATUS"
+          if [ "$STATUS" = "success" ]; then
+            STATUS="success"
+          elif [ "$STATUS" = "failure" ]; then
+            STATUS="failure"
+          else
+            STATUS="cancelled"
+          fi
+
+          python - <<'PY'
+          import json, os, urllib.request
+          payload = {
+              "repository": os.environ["REPOSITORY"],
+              "status": os.environ["STATUS"],
+              "branch": os.environ["BRANCH"],
+              "commit_sha": os.environ["COMMIT_SHA"],
+              "commit_message": os.environ.get("COMMIT_MESSAGE", ""),
+              "workflow_name": os.environ["WORKFLOW_NAME"],
+              "run_url": os.environ["RUN_URL"],
+              "duration_seconds": 0
+          }
+          req = urllib.request.Request(
+              os.environ["CI_NOTIFICATION_URL"],
+              data=json.dumps(payload).encode(),
+              headers={
+                  "Content-Type": "application/json",
+                  "X-CI-TOKEN": os.environ["CI_NOTIFICATION_TOKEN"]
+              },
+              method="POST"
+          )
+          with urllib.request.urlopen(req, timeout=20) as response:
+              print("BuildWatch response:", response.status, response.read().decode())
+          PY
+        env:
+          STATUS: ${{ job.status }}
